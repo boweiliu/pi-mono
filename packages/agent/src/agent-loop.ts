@@ -25,6 +25,42 @@ import type {
 export type AgentEventSink = (event: AgentEvent) => Promise<void> | void;
 
 /**
+ * Detects degeneration in thinking streams (e.g. infinite "!!!!!!").
+ * Tracks a sliding window of recent characters and triggers when a single
+ * character dominates the window.
+ */
+class ThinkingDegenerationDetector {
+	private buffer = "";
+	private readonly windowSize: number;
+	private readonly threshold: number;
+	private readonly minChars: number;
+
+	constructor(windowSize = 200, threshold = 0.85, minChars = 100) {
+		this.windowSize = windowSize;
+		this.threshold = threshold;
+		this.minChars = minChars;
+	}
+
+	/** Feed a thinking delta. Returns true if degeneration detected. */
+	feed(delta: string): boolean {
+		this.buffer += delta;
+		if (this.buffer.length < this.minChars) return false;
+
+		const window = this.buffer.slice(-this.windowSize);
+		const counts = new Map<string, number>();
+		for (const ch of window) {
+			counts.set(ch, (counts.get(ch) || 0) + 1);
+		}
+		for (const count of counts.values()) {
+			if (count / window.length >= this.threshold) {
+				return true;
+			}
+		}
+		return false;
+	}
+}
+
+/**
  * Start an agent loop with a new prompt message.
  * The prompt is added to the context and events are emitted for it.
  */
@@ -309,6 +345,7 @@ async function streamAssistantResponse(
 
 	let partialMessage: AssistantMessage | null = null;
 	let addedPartial = false;
+	const degenerationDetector = new ThinkingDegenerationDetector();
 
 	for await (const event of response) {
 		switch (event.type) {
@@ -329,6 +366,19 @@ async function streamAssistantResponse(
 			case "toolcall_delta":
 			case "toolcall_end":
 				if (partialMessage) {
+					// Check for thinking stream degeneration
+					if (event.type === "thinking_delta" && degenerationDetector.feed(event.delta)) {
+						const abortedMessage: AssistantMessage = {
+							...partialMessage,
+							stopReason: "aborted",
+							errorMessage:
+								"Thinking stream degeneration detected (repetitive tokens). Aborting to prevent token waste.",
+						};
+						context.messages[context.messages.length - 1] = abortedMessage;
+						await emit({ type: "message_end", message: abortedMessage });
+						return abortedMessage;
+					}
+
 					partialMessage = event.partial;
 					context.messages[context.messages.length - 1] = partialMessage;
 					await emit({
