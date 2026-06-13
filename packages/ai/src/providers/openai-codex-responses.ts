@@ -456,6 +456,22 @@ function buildRequestBody(
 		body.temperature = options.temperature;
 	}
 
+	if (options?.frequencyPenalty !== undefined) {
+		body.frequency_penalty = options.frequencyPenalty;
+	}
+
+	if (options?.presencePenalty !== undefined) {
+		body.presence_penalty = options.presencePenalty;
+	}
+
+	if (options?.topP !== undefined) {
+		body.top_p = options.topP;
+	}
+
+	if (options?.topK !== undefined) {
+		body.top_k = options.topK;
+	}
+
 	if (options?.serviceTier !== undefined) {
 		body.service_tier = options.serviceTier;
 	}

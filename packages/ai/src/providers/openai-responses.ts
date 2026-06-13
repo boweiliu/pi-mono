@@ -248,6 +248,22 @@ function buildParams(model: Model<"openai-responses">, context: Context, options
 		params.temperature = options?.temperature;
 	}
 
+	if (options?.frequencyPenalty !== undefined) {
+		(params as any).frequency_penalty = options.frequencyPenalty;
+	}
+
+	if (options?.presencePenalty !== undefined) {
+		(params as any).presence_penalty = options.presencePenalty;
+	}
+
+	if (options?.topP !== undefined) {
+		(params as any).top_p = options.topP;
+	}
+
+	if (options?.topK !== undefined) {
+		(params as any).top_k = options.topK;
+	}
+
 	if (options?.serviceTier !== undefined) {
 		params.service_tier = options.serviceTier;
 	}

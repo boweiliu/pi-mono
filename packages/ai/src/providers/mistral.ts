@@ -252,6 +252,9 @@ function buildChatPayload(
 	if (context.tools?.length) payload.tools = toFunctionTools(context.tools);
 	if (options?.temperature !== undefined) payload.temperature = options.temperature;
 	if (options?.maxTokens !== undefined) payload.maxTokens = options.maxTokens;
+	if (options?.frequencyPenalty !== undefined) payload.frequencyPenalty = options.frequencyPenalty;
+	if (options?.presencePenalty !== undefined) payload.presencePenalty = options.presencePenalty;
+	if (options?.topP !== undefined) (payload as any).topP = options.topP;
 	if (options?.toolChoice) payload.toolChoice = mapToolChoice(options.toolChoice);
 	if (options?.promptMode) payload.promptMode = options.promptMode;
 	if (options?.reasoningEffort) payload.reasoningEffort = options.reasoningEffort;

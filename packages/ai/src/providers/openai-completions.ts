@@ -535,6 +535,22 @@ function buildParams(
 		params.temperature = options.temperature;
 	}
 
+	if (options?.frequencyPenalty !== undefined) {
+		(params as any).frequency_penalty = options.frequencyPenalty;
+	}
+
+	if (options?.presencePenalty !== undefined) {
+		(params as any).presence_penalty = options.presencePenalty;
+	}
+
+	if (options?.topP !== undefined) {
+		(params as any).top_p = options.topP;
+	}
+
+	if (options?.topK !== undefined) {
+		(params as any).top_k = options.topK;
+	}
+
 	if (context.tools && context.tools.length > 0) {
 		params.tools = convertTools(context.tools, compat);
 		if (compat.zaiToolStream) {

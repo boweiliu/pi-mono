@@ -80,6 +80,18 @@ export interface CreateAgentSessionOptions {
 	settingsManager?: SettingsManager;
 	/** Session start event metadata for extension runtime startup. */
 	sessionStartEvent?: SessionStartEvent;
+	/** Sampling temperature. Range: 0 to 2. */
+	temperature?: number;
+	/** Maximum number of tokens to generate. */
+	maxTokens?: number;
+	/** Reduces repetition by penalizing tokens based on frequency. Range: -2.0 to 2.0. */
+	frequencyPenalty?: number;
+	/** Reduces repetition by penalizing tokens that have already appeared. Range: -2.0 to 2.0. */
+	presencePenalty?: number;
+	/** Nucleus sampling parameter. Range: 0 to 1. */
+	topP?: number;
+	/** Top-k sampling parameter. Limits next-token pool to k most likely candidates. */
+	topK?: number;
 }
 
 /** Result from createAgentSession */
@@ -298,6 +310,12 @@ export async function createAgentSession(options: CreateAgentSessionOptions = {}
 			tools: [],
 		},
 		convertToLlm: convertToLlmWithBlockImages,
+		temperature: options.temperature,
+		maxTokens: options.maxTokens,
+		frequencyPenalty: options.frequencyPenalty,
+		presencePenalty: options.presencePenalty,
+		topP: options.topP,
+		topK: options.topK,
 		streamFn: async (model, context, options) => {
 			const auth = await modelRegistry.getApiKeyAndHeaders(model);
 			if (!auth.ok) {

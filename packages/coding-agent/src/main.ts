@@ -433,6 +433,14 @@ function buildSessionOptions(
 		options.excludeTools = [...parsed.excludeTools];
 	}
 
+	// Sampling parameters
+	if (parsed.temperature !== undefined) options.temperature = parsed.temperature;
+	if (parsed.maxTokens !== undefined) options.maxTokens = parsed.maxTokens;
+	if (parsed.frequencyPenalty !== undefined) options.frequencyPenalty = parsed.frequencyPenalty;
+	if (parsed.presencePenalty !== undefined) options.presencePenalty = parsed.presencePenalty;
+	if (parsed.topP !== undefined) options.topP = parsed.topP;
+	if (parsed.topK !== undefined) options.topK = parsed.topK;
+
 	return { options, cliThinkingFromModel, diagnostics };
 }
 
@@ -692,6 +700,12 @@ export async function main(args: string[], options?: MainOptions) {
 			excludeTools: sessionOptions.excludeTools,
 			noTools: sessionOptions.noTools,
 			customTools: sessionOptions.customTools,
+			temperature: sessionOptions.temperature,
+			maxTokens: sessionOptions.maxTokens,
+			frequencyPenalty: sessionOptions.frequencyPenalty,
+			presencePenalty: sessionOptions.presencePenalty,
+			topP: sessionOptions.topP,
+			topK: sessionOptions.topK,
 		});
 		const cliThinkingOverride = parsed.thinking !== undefined || cliThinkingFromModel;
 		if (created.session.model && cliThinkingOverride) {

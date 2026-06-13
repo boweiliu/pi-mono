@@ -87,6 +87,14 @@ export interface ProviderResponse {
 export interface StreamOptions {
 	temperature?: number;
 	maxTokens?: number;
+	/** Reduces repetition by penalizing tokens based on how frequently they appear in the generated text. Range: -2.0 to 2.0. */
+	frequencyPenalty?: number;
+	/** Reduces repetition by penalizing tokens that have already appeared in the text. Range: -2.0 to 2.0. */
+	presencePenalty?: number;
+	/** Nucleus sampling parameter. Range: 0 to 1. */
+	topP?: number;
+	/** Top-k sampling parameter. Limits the pool of next tokens to the k most likely. */
+	topK?: number;
 	signal?: AbortSignal;
 	apiKey?: string;
 	/**

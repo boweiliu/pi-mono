@@ -4,6 +4,10 @@ export function buildBaseOptions(_model: Model<Api>, options?: SimpleStreamOptio
 	return {
 		temperature: options?.temperature,
 		maxTokens: options?.maxTokens,
+		frequencyPenalty: options?.frequencyPenalty,
+		presencePenalty: options?.presencePenalty,
+		topP: options?.topP,
+		topK: options?.topK,
 		signal: options?.signal,
 		apiKey: apiKey || options?.apiKey,
 		transport: options?.transport,

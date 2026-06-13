@@ -113,6 +113,18 @@ export interface AgentOptions {
 	transport?: Transport;
 	maxRetryDelayMs?: number;
 	toolExecution?: ToolExecutionMode;
+	/** Sampling temperature. Range: 0 to 2. */
+	temperature?: number;
+	/** Maximum number of tokens to generate. */
+	maxTokens?: number;
+	/** Reduces repetition by penalizing tokens based on frequency. Range: -2.0 to 2.0. */
+	frequencyPenalty?: number;
+	/** Reduces repetition by penalizing tokens that have already appeared. Range: -2.0 to 2.0. */
+	presencePenalty?: number;
+	/** Nucleus sampling parameter. Range: 0 to 1. */
+	topP?: number;
+	/** Top-k sampling parameter. Limits next-token pool to k most likely candidates. */
+	topK?: number;
 }
 
 class PendingMessageQueue {
@@ -197,6 +209,18 @@ export class Agent {
 	public maxRetryDelayMs?: number;
 	/** Tool execution strategy for assistant messages that contain multiple tool calls. */
 	public toolExecution: ToolExecutionMode;
+	/** Sampling temperature. Range: 0 to 2. */
+	public temperature?: number;
+	/** Maximum number of tokens to generate. */
+	public maxTokens?: number;
+	/** Reduces repetition by penalizing tokens based on frequency. Range: -2.0 to 2.0. */
+	public frequencyPenalty?: number;
+	/** Reduces repetition by penalizing tokens that have already appeared. Range: -2.0 to 2.0. */
+	public presencePenalty?: number;
+	/** Nucleus sampling parameter. Range: 0 to 1. */
+	public topP?: number;
+	/** Top-k sampling parameter. Limits next-token pool to k most likely candidates. */
+	public topK?: number;
 
 	constructor(options: AgentOptions = {}) {
 		this._state = createMutableAgentState(options.initialState);
@@ -216,6 +240,12 @@ export class Agent {
 		this.transport = options.transport ?? "auto";
 		this.maxRetryDelayMs = options.maxRetryDelayMs;
 		this.toolExecution = options.toolExecution ?? "parallel";
+		this.temperature = options.temperature;
+		this.maxTokens = options.maxTokens;
+		this.frequencyPenalty = options.frequencyPenalty;
+		this.presencePenalty = options.presencePenalty;
+		this.topP = options.topP;
+		this.topK = options.topK;
 	}
 
 	/**
@@ -437,6 +467,12 @@ export class Agent {
 			convertToLlm: this.convertToLlm,
 			transformContext: this.transformContext,
 			getApiKey: this.getApiKey,
+			temperature: this.temperature,
+			maxTokens: this.maxTokens,
+			frequencyPenalty: this.frequencyPenalty,
+			presencePenalty: this.presencePenalty,
+			topP: this.topP,
+			topK: this.topK,
 			getSteeringMessages: async () => {
 				if (skipInitialSteeringPoll) {
 					skipInitialSteeringPoll = false;

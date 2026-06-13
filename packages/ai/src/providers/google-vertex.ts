@@ -438,6 +438,12 @@ function buildParams(
 	if (options.maxTokens !== undefined) {
 		generationConfig.maxOutputTokens = options.maxTokens;
 	}
+	if (options.topP !== undefined) {
+		generationConfig.topP = options.topP;
+	}
+	if (options.topK !== undefined) {
+		generationConfig.topK = options.topK;
+	}
 
 	const config: GenerateContentConfig = {
 		...(Object.keys(generationConfig).length > 0 && generationConfig),

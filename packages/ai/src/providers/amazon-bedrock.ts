@@ -201,6 +201,10 @@ export const streamBedrock: StreamFunction<"bedrock-converse-stream", BedrockOpt
 				inferenceConfig: {
 					...(inferenceMaxTokens !== undefined && { maxTokens: inferenceMaxTokens }),
 					...(options.temperature !== undefined && { temperature: options.temperature }),
+					...(options.frequencyPenalty !== undefined && { frequencyPenalty: options.frequencyPenalty }),
+					...(options.presencePenalty !== undefined && { presencePenalty: options.presencePenalty }),
+					...(options.topP !== undefined && { topP: options.topP }),
+					...(options.topK !== undefined && { topK: options.topK }),
 				},
 				toolConfig: convertToolConfig(context.tools, options.toolChoice),
 				additionalModelRequestFields: buildAdditionalModelRequestFields(model, options),

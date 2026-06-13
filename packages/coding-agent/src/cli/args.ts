@@ -47,6 +47,18 @@ export interface Args {
 	offline?: boolean;
 	verbose?: boolean;
 	projectTrustOverride?: boolean;
+	/** Sampling temperature. Range: 0 to 2. */
+	temperature?: number;
+	/** Maximum number of tokens to generate. */
+	maxTokens?: number;
+	/** Reduces repetition by penalizing tokens based on frequency. Range: -2.0 to 2.0. */
+	frequencyPenalty?: number;
+	/** Reduces repetition by penalizing tokens that have already appeared. Range: -2.0 to 2.0. */
+	presencePenalty?: number;
+	/** Nucleus sampling parameter. Range: 0 to 1. */
+	topP?: number;
+	/** Top-k sampling parameter. Limits next-token pool to k most likely candidates. */
+	topK?: number;
 	messages: string[];
 	fileArgs: string[];
 	/** Unknown flags (potentially extension flags) - map of flag name to value */
@@ -183,6 +195,24 @@ export function parseArgs(args: string[]): Args {
 			result.projectTrustOverride = false;
 		} else if (arg === "--offline") {
 			result.offline = true;
+		} else if (arg === "--temperature" && i + 1 < args.length) {
+			const parsed = parseFloat(args[++i]);
+			if (!Number.isNaN(parsed)) result.temperature = parsed;
+		} else if (arg === "--max-tokens" && i + 1 < args.length) {
+			const parsed = parseInt(args[++i], 10);
+			if (!Number.isNaN(parsed)) result.maxTokens = parsed;
+		} else if (arg === "--frequency-penalty" && i + 1 < args.length) {
+			const parsed = parseFloat(args[++i]);
+			if (!Number.isNaN(parsed)) result.frequencyPenalty = parsed;
+		} else if (arg === "--presence-penalty" && i + 1 < args.length) {
+			const parsed = parseFloat(args[++i]);
+			if (!Number.isNaN(parsed)) result.presencePenalty = parsed;
+		} else if (arg === "--top-p" && i + 1 < args.length) {
+			const parsed = parseFloat(args[++i]);
+			if (!Number.isNaN(parsed)) result.topP = parsed;
+		} else if (arg === "--top-k" && i + 1 < args.length) {
+			const parsed = parseInt(args[++i], 10);
+			if (!Number.isNaN(parsed)) result.topK = parsed;
 		} else if (arg.startsWith("@")) {
 			result.fileArgs.push(arg.slice(1)); // Remove @ prefix
 		} else if (arg.startsWith("--")) {
@@ -274,6 +304,12 @@ ${chalk.bold("Options:")}
   --approve, -a                  Trust project-local files for this run
   --no-approve, -na              Ignore project-local files for this run
   --offline                      Disable startup network operations (same as PI_OFFLINE=1)
+  --temperature <number>         Sampling temperature, e.g. 0.8
+  --max-tokens <number>          Maximum tokens to generate
+  --frequency-penalty <number>   Token frequency penalty, e.g. 0.5
+  --presence-penalty <number>    Token presence penalty, e.g. 0.5
+  --top-p <number>               Nucleus sampling threshold, e.g. 0.9
+  --top-k <number>               Top-k sampling limit, e.g. 50
   --help, -h                     Show this help
   --version, -v                  Show version number
 
