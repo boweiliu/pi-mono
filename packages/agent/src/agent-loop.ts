@@ -226,8 +226,27 @@ async function runLoop(
 			}
 
 			// Stream assistant response
-			const message = await streamAssistantResponse(currentContext, config, signal, emit, streamFn);
+			const { message, degenerationDetected } = await streamAssistantResponse(
+				currentContext,
+				config,
+				signal,
+				emit,
+				streamFn,
+			);
 			newMessages.push(message);
+
+			if (degenerationDetected) {
+				const recoveryText = config.degenerationRecoveryPrompt ?? "Please continue.";
+				const recoveryMessage: AgentMessage = {
+					role: "user",
+					content: [{ type: "text", text: recoveryText }],
+					timestamp: Date.now(),
+				};
+				await emit({ type: "turn_end", message, toolResults: [] });
+				pendingMessages.unshift(recoveryMessage);
+				// Continue the inner loop without emitting agent_end
+				continue;
+			}
 
 			if (message.stopReason === "error" || message.stopReason === "aborted") {
 				await emit({ type: "turn_end", message, toolResults: [] });
@@ -314,7 +333,7 @@ async function streamAssistantResponse(
 	signal: AbortSignal | undefined,
 	emit: AgentEventSink,
 	streamFn?: StreamFn,
-): Promise<AssistantMessage> {
+): Promise<{ message: AssistantMessage; degenerationDetected: boolean }> {
 	// Apply context transform if configured (AgentMessage[] → AgentMessage[])
 	let messages = context.messages;
 	if (config.transformContext) {
@@ -376,7 +395,7 @@ async function streamAssistantResponse(
 						};
 						context.messages[context.messages.length - 1] = abortedMessage;
 						await emit({ type: "message_end", message: abortedMessage });
-						return abortedMessage;
+						return { message: abortedMessage, degenerationDetected: true };
 					}
 
 					partialMessage = event.partial;
@@ -401,7 +420,7 @@ async function streamAssistantResponse(
 					await emit({ type: "message_start", message: { ...finalMessage } });
 				}
 				await emit({ type: "message_end", message: finalMessage });
-				return finalMessage;
+				return { message: finalMessage, degenerationDetected: false };
 			}
 		}
 	}
@@ -414,7 +433,7 @@ async function streamAssistantResponse(
 		await emit({ type: "message_start", message: { ...finalMessage } });
 	}
 	await emit({ type: "message_end", message: finalMessage });
-	return finalMessage;
+	return { message: finalMessage, degenerationDetected: false };
 }
 
 /**
