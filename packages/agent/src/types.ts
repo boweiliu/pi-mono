@@ -274,6 +274,12 @@ export interface AgentLoopConfig extends SimpleStreamOptions {
 	 * The hook receives the agent abort signal and is responsible for honoring it.
 	 */
 	afterToolCall?: (context: AfterToolCallContext, signal?: AbortSignal) => Promise<AfterToolCallResult | undefined>;
+
+	/**
+	 * Recovery prompt text injected when the thinking stream degenerates.
+	 * Defaults to "Please continue."
+	 */
+	degenerationRecoveryPrompt?: string;
 }
 
 /**
