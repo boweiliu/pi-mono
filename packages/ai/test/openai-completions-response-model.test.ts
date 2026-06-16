@@ -53,6 +53,105 @@ function openRouterAuto(): Model<"openai-completions"> {
 	};
 }
 
+describe("openai-completions responseProvider", () => {
+	beforeEach(() => {
+		mockState.chunks = [];
+	});
+
+	it("surfaces chunk.provider on responseProvider for OpenRouter", async () => {
+		mockState.chunks = [
+			{
+				id: "gen-123",
+				model: "anthropic/claude-sonnet-4",
+				provider: "Akash",
+				choices: [{ index: 0, delta: { content: "hi" } }],
+			},
+			{
+				id: "gen-123",
+				model: "anthropic/claude-sonnet-4",
+				provider: "Akash",
+				choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
+				usage: {
+					prompt_tokens: 1,
+					completion_tokens: 1,
+					prompt_tokens_details: { cached_tokens: 0 },
+					completion_tokens_details: { reasoning_tokens: 0 },
+				},
+			},
+		];
+
+		const message = await complete(
+			openRouterAuto(),
+			{ messages: [{ role: "user", content: "hi", timestamp: Date.now() }] },
+			{ apiKey: "test" },
+		);
+
+		expect(message.responseProvider).toBe("Akash");
+		expect(message.responseId).toBe("gen-123");
+		expect(message.responseModel).toBe("anthropic/claude-sonnet-4");
+	});
+
+	it("leaves responseProvider undefined when provider field is absent", async () => {
+		mockState.chunks = [
+			{
+				id: "chatcmpl-noprovider",
+				model: "gpt-4o",
+				choices: [{ index: 0, delta: { content: "hi" } }],
+			},
+			{
+				id: "chatcmpl-noprovider",
+				model: "gpt-4o",
+				choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
+				usage: {
+					prompt_tokens: 1,
+					completion_tokens: 1,
+					prompt_tokens_details: { cached_tokens: 0 },
+					completion_tokens_details: { reasoning_tokens: 0 },
+				},
+			},
+		];
+
+		const message = await complete(
+			openRouterAuto(),
+			{ messages: [{ role: "user", content: "hi", timestamp: Date.now() }] },
+			{ apiKey: "test" },
+		);
+
+		expect(message.responseProvider).toBeUndefined();
+	});
+
+	it("ignores empty provider string", async () => {
+		mockState.chunks = [
+			{
+				id: "gen-empty",
+				model: "anthropic/claude-sonnet-4",
+				provider: "",
+				choices: [{ index: 0, delta: { content: "hi" } }],
+			},
+			{
+				id: "gen-empty",
+				model: "anthropic/claude-sonnet-4",
+				provider: "",
+				choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
+				usage: {
+					prompt_tokens: 1,
+					completion_tokens: 1,
+					prompt_tokens_details: { cached_tokens: 0 },
+					completion_tokens_details: { reasoning_tokens: 0 },
+				},
+			},
+		];
+
+		const message = await complete(
+			openRouterAuto(),
+			{ messages: [{ role: "user", content: "hi", timestamp: Date.now() }] },
+			{ apiKey: "test" },
+		);
+
+		expect(message.responseProvider).toBeUndefined();
+	});
+});
+
 describe("openai-completions responseModel", () => {
 	beforeEach(() => {
 		mockState.chunks = [];
