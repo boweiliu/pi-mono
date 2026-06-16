@@ -39,6 +39,7 @@ import { resolvePath } from "../utils/paths.ts";
 import { sleep } from "../utils/sleep.ts";
 import { formatNoApiKeyFoundMessage, formatNoModelSelectedMessage } from "./auth-guidance.ts";
 import { type BashResult, executeBashWithOperations } from "./bash-executor.ts";
+import { appendOpenRouterAttribution } from "./openrouter-log.ts";
 import {
 	type CompactionResult,
 	calculateContextTokens,
@@ -543,6 +544,19 @@ export class AgentSession {
 						attempt: this._retryAttempt,
 					});
 					this._retryAttempt = 0;
+				}
+
+				// Log OpenRouter provider attribution to NDJSON log (best-effort)
+				if (assistantMsg.provider === "openrouter" || assistantMsg.model?.includes("openrouter")) {
+					appendOpenRouterAttribution({
+						timestamp: Date.now(),
+						sessionId: this.sessionManager.getSessionId(),
+						requestId: assistantMsg.responseId,
+						provider: assistantMsg.responseProvider,
+						upstreamModel: assistantMsg.responseModel,
+						requestedModel: assistantMsg.model,
+						requestedProvider: assistantMsg.provider,
+					});
 				}
 			}
 		}
