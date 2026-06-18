@@ -2671,6 +2671,23 @@ export class InteractiveMode {
 				await this.shutdown();
 				return;
 			}
+			if (text === "/quitq" || text === "/qquit") {
+				this.editor.setText("");
+				if (this.session.isStreaming || this.session.isCompacting) {
+					if (this.shutdownRequested) {
+						this.shutdownRequested = false;
+						this.showWarning("Queued quit cancelled.");
+					} else {
+						this.shutdownRequested = true;
+						this.showWarning(
+							"Quit queued. The agent will exit after the current run completes. Type /quitq again to cancel.",
+						);
+					}
+				} else {
+					await this.shutdown();
+				}
+				return;
+			}
 
 			// Handle bash command (! for normal, !! for excluded from context)
 			if (text.startsWith("!")) {
