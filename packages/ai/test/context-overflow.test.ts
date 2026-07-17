@@ -14,8 +14,7 @@
 import type { ChildProcess } from "child_process";
 import { execSync, spawn } from "child_process";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { getModel, getModels } from "../src/models.ts";
-import { complete } from "../src/stream.ts";
+import { complete, getModel, getModels } from "../src/compat.ts";
 import type { AssistantMessage, Context, Model, Usage } from "../src/types.ts";
 import { isContextOverflow } from "../src/utils/overflow.ts";
 import { hasAzureOpenAICredentials } from "./azure-utils.ts";
@@ -263,8 +262,8 @@ describe("Context overflow error handling", () => {
 	// =============================================================================
 
 	describe.skipIf(!process.env.XAI_API_KEY)("xAI", () => {
-		it("grok-3-fast - should detect overflow via isContextOverflow", async () => {
-			const model = getModel("xai", "grok-3-fast");
+		it("grok-4.3 - should detect overflow via isContextOverflow", async () => {
+			const model = getModel("xai", "grok-4.3");
 			const result = await testContextOverflow(model, process.env.XAI_API_KEY!);
 			logResult(result);
 
