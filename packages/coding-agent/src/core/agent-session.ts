@@ -81,6 +81,7 @@ import {
 import { emitSessionShutdownEvent } from "./extensions/runner.ts";
 import type { BashExecutionMessage, CustomMessage } from "./messages.ts";
 import type { ModelRegistry } from "./model-registry.ts";
+import { appendOpenRouterAttribution } from "./openrouter-log.ts";
 import { expandPromptTemplate, type PromptTemplate } from "./prompt-templates.ts";
 import type { ResourceExtensionPaths, ResourceLoader } from "./resource-loader.ts";
 import type { BranchSummaryEntry, CompactionEntry, SessionManager } from "./session-manager.ts";
@@ -541,6 +542,19 @@ export class AgentSession {
 						attempt: this._retryAttempt,
 					});
 					this._retryAttempt = 0;
+				}
+
+				// Log OpenRouter provider attribution to NDJSON log (best-effort)
+				if (assistantMsg.provider === "openrouter" || assistantMsg.model?.includes("openrouter")) {
+					appendOpenRouterAttribution({
+						timestamp: Date.now(),
+						sessionId: this.sessionManager.getSessionId(),
+						requestId: assistantMsg.responseId,
+						provider: assistantMsg.responseProvider,
+						upstreamModel: assistantMsg.responseModel,
+						requestedModel: assistantMsg.model,
+						requestedProvider: assistantMsg.provider,
+					});
 				}
 			}
 		}

@@ -273,6 +273,9 @@ export const streamOpenAICompletions: StreamFunction<"openai-completions", OpenA
 				if (typeof chunk.model === "string" && chunk.model.length > 0 && chunk.model !== model.id) {
 					output.responseModel ||= chunk.model;
 				}
+				if (typeof (chunk as any).provider === "string" && (chunk as any).provider.length > 0) {
+					output.responseProvider ||= (chunk as any).provider;
+				}
 				if (chunk.usage) {
 					output.usage = parseChunkUsage(chunk.usage, model);
 				}
